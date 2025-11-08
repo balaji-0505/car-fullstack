@@ -3,7 +3,6 @@ package com.klu.carrental.service;
 import com.klu.carrental.entity.User;
 import com.klu.carrental.repository.UserRepository;
 import com.klu.carrental.security.JwtUtil;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
