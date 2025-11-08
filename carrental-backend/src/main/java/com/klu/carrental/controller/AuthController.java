@@ -7,41 +7,40 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:30082") // ✅ frontend NodePort
+@CrossOrigin(origins = "http://localhost:30082")
 public class AuthController {
-
     private final UserService userService;
 
     public AuthController(UserService userService) {
         this.userService = userService;
     }
 
-    // ✅ Signup API
+    // ✅ Signup endpoint
     @PostMapping("/signup")
     public ResponseEntity<String> registerUser(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String email = request.get("email");
-        String password = request.get("password");
-
-        String result = userService.registerUser(username, email, password);
-
-        if (result.contains("exists")) {
-            return ResponseEntity.status(409).body(result); // Conflict if already exists
+        try {
+            String msg = userService.registerUser(
+                request.get("username"),
+                request.get("email"),
+                request.get("password")
+            );
+            return ResponseEntity.ok(msg);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok(result);
     }
 
-    // ✅ Login API
+    // ✅ Login endpoint (returns JWT)
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String password = request.get("password");
-
-        String result = userService.loginUser(username, password);
-
-        if (result.contains("Invalid")) {
-            return ResponseEntity.status(401).body(result); // Unauthorized
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> request) {
+        try {
+            String token = userService.loginUser(
+                request.get("username"),
+                request.get("password")
+            );
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
         }
-        return ResponseEntity.ok(result);
     }
 }
